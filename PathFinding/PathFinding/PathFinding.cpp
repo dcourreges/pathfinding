@@ -1,7 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <cstdlib>
+#include <cstdlib> 
+#include <ctime>
 #include "conio.h"
 
 int main()
@@ -23,7 +24,14 @@ int main()
 
     std::string BackGREEN = "\033[42m";
 
+    std::string BackBLUE = "\033[44m";
 
+    const int dirs[4][2] = {
+    {  0, -1 },   // up
+    {  0,  1 },   // down
+    { -1,  0 },   // left
+    {  1,  0 }    // right
+    };
 
     int LINE = 10;
 
@@ -37,6 +45,11 @@ int main()
     int cursorPosX = 2;
     int cursorPosY = 3;
 
+    srand(time(0));
+
+    int obstaclePosX = playerPosX;//rand()%LINE;
+    int obstaclePosY = playerPosY + 3;//rand()%ROW;
+
     bool playing = true;
 
 
@@ -49,7 +62,7 @@ int main()
 
        
 
-        if (GETCHAR == 75 || GETCHAR ==  113)
+        if ((GETCHAR == 75 || GETCHAR ==  113) && (cursorPosX - 1 != obstaclePosX && cursorPosY != obstaclePosY) )
         {
             cursorPosX -= 1;
 
@@ -58,7 +71,7 @@ int main()
                 cursorPosX = 0;
         }
 
-        if (GETCHAR == 77 || GETCHAR == 100)
+        if ((GETCHAR == 77 || GETCHAR == 100 )) //&& (cursorPosX + 1 != obstaclePosX))
         {
             cursorPosX += 1;
 
@@ -68,7 +81,7 @@ int main()
 
         }
 
-        if (GETCHAR == 72 || GETCHAR == 122)
+        if ((GETCHAR == 72 || GETCHAR == 122)) //&& (cursorPosY - 1 != obstaclePosY))
         {
             cursorPosY -= 1;
 
@@ -76,7 +89,7 @@ int main()
                 cursorPosY = 0;
         }
 
-        if (GETCHAR == 80 || GETCHAR == 115)
+        if ((GETCHAR == 80 || GETCHAR == 115))// && (cursorPosY + 1 != obstaclePosY))
         {
             cursorPosY += 1;
 
@@ -96,7 +109,23 @@ int main()
             playerPosY = cursorPosY;
         }
 
-       
+       int returnY = cursorPosY - 1;
+
+       if (returnY < 0)
+       {
+           returnY = cursorPosY + 1;
+       }
+
+       int returnX = cursorPosX - 1;
+
+       if (returnX < 0)
+       {
+           returnX = cursorPosX + 1;
+       }
+
+       bool obstacleOnPathX = (obstaclePosY == cursorPosY) && ((obstaclePosX >= playerPosX && obstaclePosX <= cursorPosX) || (obstaclePosX <= playerPosX && obstaclePosX >= cursorPosX));
+
+       bool obstacleOnPathY = (obstaclePosX == cursorPosX) && ((obstaclePosY >= playerPosY && obstaclePosY <= cursorPosY) || (obstaclePosY <= playerPosY && obstaclePosY >= cursorPosY));
 
         for (int row = 0; row < ROW; row++)
         {
@@ -114,24 +143,36 @@ int main()
                     continue;
                 }
 
+                if (row == obstaclePosY && line == obstaclePosX)
+                {
+                    std::cout << "[" << CharBOLD << CharGREEN << "#" << CharRESET << "] ";
+                    continue;
+                }
+
+
                 if ((line <= cursorPosX && line >= playerPosX || line >= cursorPosX && line <= playerPosX) && row == cursorPosY)
                 {
                     std::cout << "[" << BackYELLOW << " " << BackRESET << "] ";
                     continue;
                 }
 
-
                 if ((row <= cursorPosY && row >= playerPosY || row >= cursorPosY && row <= playerPosY) && line == playerPosX)
                 {
                     std::cout  << "[" << BackGREEN << " " << BackRESET << "] " ;
                     continue;
                 }
-                /*if (isPath)
-                {
-                    std::cout << BackGREEN << "[" << " "  << "] " << BackRESET;
-                    continue;
-                }*/
 
+                if (obstacleOnPathX && row == returnY && line >= obstaclePosX - 1 && line <= obstaclePosX + 1)
+                {
+                    std::cout << "[" << BackBLUE << " " << BackRESET << "] ";
+                    continue;
+                }
+
+                if (obstacleOnPathY && line == returnX && row >= obstaclePosY - 1 && row <= obstaclePosY + 1)
+                {
+                    std::cout << "[" << BackBLUE << " " << BackRESET << "] ";
+                    continue;
+                }
 
 
                 std::cout << "[ ] ";
